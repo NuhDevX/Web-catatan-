@@ -375,6 +375,11 @@
             color: white;
         }
 
+        .btn-secondary {
+            background: linear-gradient(135deg, #6c757d 0%, #545b62 100%);
+            color: white;
+        }
+
         .btn-danger {
             background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
             color: white;
@@ -479,6 +484,7 @@
                     
                     <div class="action-buttons">
                         <button class="btn btn-primary" onclick="saveNote()">💾 Simpan</button>
+                        <button class="btn btn-secondary" onclick="reloadNote()">🔄 Reload</button>
                         <button class="btn btn-danger" onclick="deleteNote()">🗑️ Hapus</button>
                     </div>
                 </div>
@@ -559,6 +565,11 @@
                 renderNotesList();
                 showEmptyState();
             }
+        }
+
+        function reloadNote() {
+            renderNotesList();
+            showEmptyState();
         }
 
         function handleFiles(files) {
