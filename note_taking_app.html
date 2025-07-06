@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyNotes - Catatan Multi-Media</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .main-content {
+            display: flex;
+            min-height: 600px;
+        }
+
+        .sidebar {
+            width: 300px;
+            background: #f8f9fa;
+            border-right: 1px solid #e9ecef;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .content-area {
+            flex: 1;
+            padding: 20px;
+            background: white;
+            overflow-y: auto;
+        }
+
+        .new-note-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .new-note-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(76, 175, 80, 0.3);
+        }
+
+        .new-note-btn:active {
+            transform: translateY(0);
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .notes-list {
+            list-style: none;
+        }
+
+        .note-item {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .note-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border-color: #667eea;
+        }
+
+        .note-item.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+        }
+
+        .note-title {
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .note-preview {
+            font-size: 12px;
+            opacity: 0.7;
+            line-height: 1.4;
+            max-height: 40px;
+            overflow: hidden;
+        }
+
+        .note-date {
+            font-size: 11px;
+            opacity: 0.6;
+            margin-top: 5px;
+        }
+
+        .note-editor {
+            display: none;
+        }
+
+        .note-editor.active {
+            display: block;
+        }
+
+        .note-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .note-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .note-content {
+            width: 100%;
+            min-height: 200px;
+            padding: 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 14px;
+            line-height: 1.6;
+            resize: vertical;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+
+        .note-content:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .media-upload {
+            background: #f8f9fa;
+            border: 2px dashed #dee2e6;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            margin: 15px 0;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .media-upload:hover {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .media-upload.dragover {
+            border-color: #4CAF50;
+            background: rgba(76, 175, 80, 0.05);
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .upload-text {
+            color: #6c757d;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        .media-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .media-item {
+            position: relative;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .media-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .media-item img, .media-item video {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+
+        .file-item {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .file-item::before {
+            content: '📄';
+            font-size: 24px;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .file-name {
+            font-size: 12px;
+            font-weight: bold;
+            color: #1976d2;
+            word-break: break-all;
+            line-height: 1.3;
+        }
+
+        .delete-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(244, 67, 54, 0.9);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .delete-btn:hover {
+            background: #f44336;
+            transform: scale(1.1);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6c757d;
+        }
+
+        .empty-state h3 {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+            color: #495057;
+        }
+
+        .empty-state p {
+            font-size: 1.1em;
+            line-height: 1.6;
+        }
+
+        .media-counter {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid #e9ecef;
+            }
+            
+            .media-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📝 MyNotes</h1>
+            <p>Catatan Multi-Media dengan Teks, Foto, Video & File</p>
+        </div>
+        
+        <div class="main-content">
+            <div class="sidebar">
+                <button class="new-note-btn" onclick="createNewNote()">
+                    ✨ Buat Catatan Baru
+                </button>
+                
+                <input type="text" class="search-box" placeholder="🔍 Cari catatan..." onkeyup="searchNotes(this.value)">
+                
+                <ul class="notes-list" id="notesList">
+                    <!-- Notes will be populated here -->
+                </ul>
+            </div>
+            
+            <div class="content-area">
+                <div class="empty-state" id="emptyState">
+                    <h3>Selamat Datang! 🎉</h3>
+                    <p>Mulai dengan membuat catatan baru untuk menyimpan teks, foto, video, dan file Anda.</p>
+                </div>
+                
+                <div class="note-editor" id="noteEditor">
+                    <input type="text" class="note-input" id="noteTitle" placeholder="Judul catatan..." onkeyup="saveNote()">
+                    
+                    <textarea class="note-content" id="noteContent" placeholder="Tulis catatan Anda di sini..." onkeyup="saveNote()"></textarea>
+                    
+                    <div class="media-upload" onclick="document.getElementById('fileInput').click()" 
+                         ondragover="event.preventDefault(); this.classList.add('dragover')" 
+                         ondragleave="this.classList.remove('dragover')"
+                         ondrop="handleDrop(event)">
+                        <div style="font-size: 24px; margin-bottom: 10px;">📁</div>
+                        <div><strong>Klik untuk upload</strong> atau drag & drop</div>
+                        <div class="upload-text">Foto, Video, atau File (Max 50MB)</div>
+                    </div>
+                    
+                    <input type="file" id="fileInput" class="file-input" multiple accept="*/*" onchange="handleFiles(this.files)">
+                    
+                    <div class="media-grid" id="mediaGrid"></div>
+                    
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" onclick="saveNote()">💾 Simpan</button>
+                        <button class="btn btn-danger" onclick="deleteNote()">🗑️ Hapus</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let notes = [];
+        let currentNoteId = null;
+        let noteIdCounter = 1;
+
+        // Load notes from memory on page load
+        window.addEventListener('load', function() {
+            loadNotes();
+        });
+
+        function loadNotes() {
+            renderNotesList();
+            if (notes.length === 0) {
+                showEmptyState();
+            }
+        }
+
+        function createNewNote() {
+            const newNote = {
+                id: noteIdCounter++,
+                title: 'Catatan Baru',
+                content: '',
+                media: [],
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            };
+            
+            notes.unshift(newNote);
+            renderNotesList();
+            selectNote(newNote.id);
+            document.getElementById('noteTitle').focus();
+        }
+
+        function selectNote(noteId) {
+            currentNoteId = noteId;
+            const note = notes.find(n => n.id === noteId);
+            
+            if (note) {
+                document.getElementById('emptyState').style.display = 'none';
+                document.getElementById('noteEditor').classList.add('active');
+                
+                document.getElementById('noteTitle').value = note.title;
+                document.getElementById('noteContent').value = note.content;
+                
+                renderMedia(note.media);
+                updateActiveNote();
+            }
+        }
+
+        function saveNote() {
+            if (!currentNoteId) return;
+            
+            const note = notes.find(n => n.id === currentNoteId);
+            if (note) {
+                note.title = document.getElementById('noteTitle').value || 'Catatan Tanpa Judul';
+                note.content = document.getElementById('noteContent').value;
+                note.updatedAt = new Date().toISOString();
+                
+                renderNotesList();
+                updateActiveNote();
+            }
+        }
+
+        function deleteNote() {
+            if (!currentNoteId) return;
+            
+            if (confirm('Apakah Anda yakin ingin menghapus catatan ini?')) {
+                notes = notes.filter(n => n.id !== currentNoteId);
+                currentNoteId = null;
+                
+                renderNotesList();
+                showEmptyState();
+            }
+        }
+
+        function handleFiles(files) {
+            if (!currentNoteId) return;
+            
+            const note = notes.find(n => n.id === currentNoteId);
+            if (!note) return;
+            
+            Array.from(files).forEach(file => {
+                if (file.size > 50 * 1024 * 1024) {
+                    alert(`File ${file.name} terlalu besar. Maksimal 50MB.`);
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const mediaItem = {
+                        id: Date.now() + Math.random(),
+                        name: file.name,
+                        type: file.type,
+                        size: file.size,
+                        data: e.target.result,
+                        uploadedAt: new Date().toISOString()
+                    };
+                    
+                    note.media.push(mediaItem);
+                    note.updatedAt = new Date().toISOString();
+                    
+                    renderMedia(note.media);
+                    renderNotesList();
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function handleDrop(event) {
+            event.preventDefault();
+            event.target.classList.remove('dragover');
+            
+            const files = event.dataTransfer.files;
+            handleFiles(files);
+        }
+
+        function renderMedia(mediaItems) {
+            const mediaGrid = document.getElementById('mediaGrid');
+            mediaGrid.innerHTML = '';
+            
+            mediaItems.forEach(item => {
+                const mediaElement = document.createElement('div');
+                mediaElement.className = 'media-item';
+                
+                if (item.type.startsWith('image/')) {
+                    mediaElement.innerHTML = `
+                        <img src="${item.data}" alt="${item.name}" onclick="openFullscreen(this)">
+                        <button class="delete-btn" onclick="deleteMedia('${item.id}')">×</button>
+                    `;
+                } else if (item.type.startsWith('video/')) {
+                    mediaElement.innerHTML = `
+                        <video src="${item.data}" controls onclick="event.stopPropagation()"></video>
+                        <button class="delete-btn" onclick="deleteMedia('${item.id}')">×</button>
+                    `;
+                } else {
+                    mediaElement.innerHTML = `
+                        <div class="file-item">
+                            <div class="file-name">${item.name}</div>
+                            <button class="delete-btn" onclick="deleteMedia('${item.id}')">×</button>
+                        </div>
+                    `;
+                }
+                
+                mediaGrid.appendChild(mediaElement);
+            });
+        }
+
+        function deleteMedia(mediaId) {
+            if (!currentNoteId) return;
+            
+            const note = notes.find(n => n.id === currentNoteId);
+            if (note) {
+                note.media = note.media.filter(m => m.id !== mediaId);
+                note.updatedAt = new Date().toISOString();
+                
+                renderMedia(note.media);
+                renderNotesList();
+            }
+        }
+
+        function openFullscreen(img) {
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+                background: rgba(0,0,0,0.9); display: flex; align-items: center; 
+                justify-content: center; z-index: 1000; cursor: pointer;
+            `;
+            
+            const fullImg = document.createElement('img');
+            fullImg.src = img.src;
+            fullImg.style.cssText = 'max-width: 90%; max-height: 90%; object-fit: contain;';
+            
+            modal.appendChild(fullImg);
+            modal.onclick = () => document.body.removeChild(modal);
+            
+            document.body.appendChild(modal);
+        }
+
+        function renderNotesList() {
+            const notesList = document.getElementById('notesList');
+            notesList.innerHTML = '';
+            
+            notes.forEach(note => {
+                const noteItem = document.createElement('li');
+                noteItem.className = 'note-item';
+                if (note.id === currentNoteId) {
+                    noteItem.classList.add('active');
+                }
+                
+                const mediaCount = note.media.length;
+                const mediaCountHTML = mediaCount > 0 ? `<span class="media-counter">${mediaCount} file</span>` : '';
+                
+                noteItem.innerHTML = `
+                    <div class="note-title">${note.title}${mediaCountHTML}</div>
+                    <div class="note-preview">${note.content.substring(0, 100)}...</div>
+                    <div class="note-date">${formatDate(note.updatedAt)}</div>
+                `;
+                
+                noteItem.onclick = () => selectNote(note.id);
+                notesList.appendChild(noteItem);
+            });
+        }
+
+        function updateActiveNote() {
+            const noteItems = document.querySelectorAll('.note-item');
+            noteItems.forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            const activeNote = notes.find(n => n.id === currentNoteId);
+            if (activeNote) {
+                const activeIndex = notes.indexOf(activeNote);
+                if (noteItems[activeIndex]) {
+                    noteItems[activeIndex].classList.add('active');
+                }
+            }
+        }
+
+        function searchNotes(query) {
+            const noteItems = document.querySelectorAll('.note-item');
+            const searchTerm = query.toLowerCase();
+            
+            noteItems.forEach((item, index) => {
+                const note = notes[index];
+                const matchesSearch = note.title.toLowerCase().includes(searchTerm) || 
+                                    note.content.toLowerCase().includes(searchTerm);
+                
+                item.style.display = matchesSearch ? 'block' : 'none';
+            });
+        }
+
+        function showEmptyState() {
+            document.getElementById('emptyState').style.display = 'block';
+            document.getElementById('noteEditor').classList.remove('active');
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffTime = now - date;
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            
+            if (diffDays === 0) {
+                return 'Hari ini';
+            } else if (diffDays === 1) {
+                return 'Kemarin';
+            } else if (diffDays < 7) {
+                return `${diffDays} hari yang lalu`;
+            } else {
+                return date.toLocaleDateString('id-ID');
+            }
+        }
+    </script>
+</body>
+</html>
