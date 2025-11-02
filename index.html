@@ -497,16 +497,25 @@
         let currentNoteId = null;
         let noteIdCounter = 1;
 
-        // Load notes from memory on page load
+        // Load notes from memory on page load        
         window.addEventListener('load', function() {
-            loadNotes();
-        });
+    const storedNotes = localStorage.getItem('notes');
+    if (storedNotes) {
+        notes = JSON.parse(storedNotes);
+        noteIdCounter = notes.length ? Math.max(...notes.map(n => n.id)) + 1 : 1;
+    }
+    loadNotes();
+});
 
         function loadNotes() {
             renderNotesList();
             if (notes.length === 0) {
                 showEmptyState();
             }
+        }
+
+        function saveToLocalStorage() {
+    localStorage.setItem('notes', JSON.stringify(notes));
         }
 
         function createNewNote() {
@@ -523,6 +532,7 @@
             renderNotesList();
             selectNote(newNote.id);
             document.getElementById('noteTitle').focus();
+            saveToLocalStorage();
         }
 
         function selectNote(noteId) {
@@ -552,6 +562,7 @@
                 
                 renderNotesList();
                 updateActiveNote();
+                saveToLocalStorage();
             }
         }
 
@@ -564,6 +575,7 @@
                 
                 renderNotesList();
                 showEmptyState();
+                saveToLocalStorage();
             }
         }
 
@@ -736,6 +748,7 @@
                 
                 renderMedia(note.media);
                 renderNotesList();
+                saveToLocalStorage();
             }
         }
 
